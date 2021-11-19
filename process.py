@@ -34,6 +34,37 @@ def main(args):
             # Set prev_lang for the next token; IGnore univ since they are rarest
             if lang != "univ": prev_lang = lang 
 
+# Disambiguation utility functions
+##################################
+
+def removeRepeats():
+    """
+    Given a string with repeated letters, will return a list of strings, where
+    the repeated letters are removed one by one.
+
+    eg: removeRepeats("ookayy") -> [ 'ookay', 'okayy', 'okay' ]
+    """
+
+    pass
+
+def transformWithTransliterationRules():
+    """
+    Using a list of manually decided transformation rules, attempt each rule
+    on the given string and return the list of transformed strings.
+
+    eg: transformWithTransliterationRules("hume") -> [ 'humein' ]
+    """
+
+    pass
+
+def randomErrorCorrection():
+    """
+    """
+
+    pass
+
+
+
 # Load a list of unique words or syllables from a file.
 def loadDict(path):
     words = []
@@ -60,24 +91,50 @@ def loadWordMap(path, top_n):
 # Input 3: A dict of resources
 # Output: A language tag: en, hi, univ
 def assignLang(tok, prev_lang, res_dict):
+    ###
+    # Manual Disambiguation
+    ###
     # Check manual wordlist first. Do case insensitive and title case checks.
     if tok in res_dict["map"]: return res_dict["map"][tok]
     elif tok.lower() in res_dict["map"]: return res_dict["map"][tok.lower()]
     elif tok.title() in res_dict["map"]: return res_dict["map"][tok.title()]
+
+    ###
+    # Universals
+    ###
     # Punctuation. Note: 19+425 punct tokens are tagged as en and hi in the ref...
     elif re.match('^[\W_]+$', tok): return "univ"
+
     # Hashtags, shoutouts, URLs and retweet.
     elif "@" in tok or "#" in tok or "http" in tok or tok == "RT": return "univ"
+
     # Numbers and dates. Underscore is not included in \W
     elif re.sub("[\W_]", "", tok).isdigit(): return "univ"
+
     # Emoticons; mainly :P, :D and ;)
     elif tok[0] in {":", ";"}: return "univ"
+
+    ###
+    # Single word list
+    ###
     # Only in English word list (includes some proper nouns)
     elif (tok in res_dict["en"] or tok.title() in res_dict["en"] or tok.lower() in res_dict["en"]) and \
         tok.lower() not in res_dict["hi"]: return "en"
+
     # Only in Hindi word list
     elif tok.lower() not in res_dict["en"] and tok.lower() in res_dict["hi"]: return "hi"
+
+    ###
     # In both or neither list
+    ###
+
+    # - letter repetition (e.g. okkkk, nooooo)
+
+    # - transliteration transformation rules (eg. hume -> humein)
+
+    # - random error (eg. hrkat -> harkat)
+
+    # If the above methods cannot automatically disambiguate, simply return the tag of the previous token
     else: return prev_lang
 
 if __name__ == "__main__":
