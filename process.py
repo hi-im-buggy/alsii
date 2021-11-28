@@ -29,6 +29,14 @@ def main(args):
                 continue
             # Classify token language: en, hi, univ
             lang = assignLang(tok, prev_lang, res_dict)
+
+            if not lang:
+                lang = assignLang(removeNonASCII(tok), prev_lang, res_dict)
+
+            if not lang:
+                print(tok)
+                lang = prev_lang
+
             # Write to output
             out.write("\t".join([tok, lang])+"\n")
             # Set prev_lang for the next token; IGnore univ since they are rarest
@@ -36,16 +44,26 @@ def main(args):
 
 # Disambiguation utility functions
 ##################################
-
-def removeRepeats():
+def removeRepeats(word):
     """
     Given a string with repeated letters, will return a list of strings, where
     the repeated letters are removed one by one.
 
-    eg: removeRepeats("ookayy") -> [ 'ookay', 'okayy', 'okay' ]
+    eg: removeRepeats("okayy") -> [ 'okay', 'okayy']
     """
 
-    pass
+    ret = []
+
+    ret.append(re.sub(r'(\w)\1+', '\1', word))
+
+    return ret
+
+def removeNonASCII(word):
+    """
+    Given a word, remove any non-ASCII characters from it.
+    """
+
+    return re.sub(r'[^\x00-\x7F]+', '', word)
 
 def transformWithTransliterationRules():
     """
@@ -55,7 +73,13 @@ def transformWithTransliterationRules():
     eg: transformWithTransliterationRules("hume") -> [ 'humein' ]
     """
 
-    pass
+    # We write the rules as a dictionary, where the key is
+    # the regular expression that matches, and the value associated
+    # with it is the appropriate transformation to make in that case.
+
+    rules = {
+            "[A-Za-z]*me": lambda x: x + "in", # hume -> humein
+        }
 
 def randomErrorCorrection():
     """
@@ -128,14 +152,8 @@ def assignLang(tok, prev_lang, res_dict):
     # In both or neither list
     ###
 
-    # - letter repetition (e.g. okkkk, nooooo)
-
-    # - transliteration transformation rules (eg. hume -> humein)
-
-    # - random error (eg. hrkat -> harkat)
-
-    # If the above methods cannot automatically disambiguate, simply return the tag of the previous token
-    else: return prev_lang
+    else:
+        return None
 
 if __name__ == "__main__":
     # Define and parse program input
