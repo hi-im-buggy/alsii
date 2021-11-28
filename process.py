@@ -81,14 +81,6 @@ def transformWithTransliterationRules():
             "[A-Za-z]*me": lambda x: x + "in", # hume -> humein
         }
 
-def randomErrorCorrection():
-    """
-    """
-
-    pass
-
-
-
 # Load a list of unique words or syllables from a file.
 def loadDict(path):
     words = []

@@ -93,8 +93,6 @@ def calculateResults(hyp, ref):
     r = float(tp) / (tp + fn) if fn else 1.0
     f1 = float(2 * p * r) / (p + r) if p+r else 0.0
     print("-"*30)
-    print("\t".join(["OVERALL", str(round(p * 100, 3)), str(round(r * 100, 3)), str(round(f1 * 100, 3))])+"\n")
-    # P, R, F1 and Acc are all equal when calculated overall from a confusion matrix
 
 
 if __name__ == "__main__":
